@@ -1,0 +1,14 @@
+# A PEP (https://pep.databio.org): a sample table, plus attributes derived from it.
+pep_version: 2.1.0
+sample_table: samples.csv
+sample_modifiers:
+  derive:
+    attributes: [reads]
+    sources:
+      # Every sample's `reads` becomes a full path, built from its other attributes.
+      fastq: "/data/{organism}/{sample_name}.fastq.gz"
+project_modifiers:
+  amend:
+    # `--amend pilot` runs only the samples in pilot.csv.
+    pilot:
+      sample_table: pilot.csv

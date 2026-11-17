@@ -1,0 +1,46 @@
+[project]
+name = "pepilot"
+version = "0.1.0"
+description = "Run a command over every sample of a PEP, in the cloud, with SkyPilot"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Nathan LeRoy" }]
+keywords = ["bioinformatics", "pep", "skypilot", "cloud", "pipelines"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+dependencies = [
+    "peprs>=0.2.5",
+    "skypilot>=0.10",
+    "click>=7.0",
+    "jinja2>=3.0",
+    "pyyaml>=6.0",
+    "fsspec>=2024.6",
+]
+
+[project.optional-dependencies]
+# Each pulls in SkyPilot's support for that cloud and the fsspec backend that checks
+# `skip_if_exists` paths in its object store.
+aws = ["skypilot[aws]", "s3fs"]
+gcp = ["skypilot[gcp]", "gcsfs"]
+# Azure: install skypilot[azure] and adlfs yourself (skypilot[azure] needs pre-release packages,
+# which would hold back every other install of pepilot).
+
+[project.scripts]
+pepilot = "pepilot.cli:main"
+
+[project.urls]
+Repository = "https://github.com/nleroy917/pepilot"
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# SkyPilot's own imports warn about its dependencies.
+filterwarnings = ["ignore::DeprecationWarning"]

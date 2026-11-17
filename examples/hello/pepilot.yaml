@@ -1,0 +1,19 @@
+# A SkyPilot task (https://docs.skypilot.ai/en/latest/reference/yaml-spec.html), plus a
+# `pepilot:` section. Try: pepilot launch pepilot.yaml --dry-run
+name: pepilot-hello
+
+resources:
+  cpus: 2+
+
+# Runs once on each instance, before its samples.
+setup: |
+  echo "setting up $(hostname)"
+
+pepilot:
+  pep: project_config.yaml
+  # Five samples over two instances: one runs three of them, one after another; the other two.
+  workers: 2
+  # Runs once per sample, filled in from the PEP. Shell variables pass through as they are.
+  command: |
+    echo "sample {{ sample.sample_name }}, a {{ sample.organism }}, on $(hostname)"
+    echo "its reads would be at {{ sample.reads | quote }}"

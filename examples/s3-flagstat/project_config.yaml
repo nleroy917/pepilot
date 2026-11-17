@@ -1,0 +1,13 @@
+# Where each sample's BAM is and where its result goes, derived from its name, so the sample
+# table itself stays a plain list of samples.
+pep_version: 2.1.0
+sample_table: samples.csv
+sample_modifiers:
+  append:
+    bam: bam_source
+    flagstat: flagstat_source
+  derive:
+    attributes: [bam, flagstat]
+    sources:
+      bam_source: "s3://my-bucket/bams/{sample_name}.bam"
+      flagstat_source: "s3://my-bucket/flagstat/{sample_name}.flagstat.txt"

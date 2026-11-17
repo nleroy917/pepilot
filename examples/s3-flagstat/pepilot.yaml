@@ -1,0 +1,40 @@
+# samtools flagstat on BAMs in S3, results back to S3.
+#   pepilot launch pepilot.yaml --dry-run      what would run (checks S3 for finished samples)
+#   pepilot launch pepilot.yaml --use-spot     run it
+#   pepilot status pepilot.yaml                which samples are finished
+name: flagstat
+
+resources:
+  # The region your bucket is in: traffic between EC2 and S3 within a region is free.
+  infra: aws/us-east-1
+  cpus: 4+
+  disk_size: 200
+  job_recovery:
+    strategy: FAILOVER
+
+envs:
+  SAMTOOLS_THREADS: "4"
+
+# Once per instance.
+setup: |
+  set -euo pipefail
+  sudo apt-get update -q
+  sudo apt-get install -y -q samtools unzip
+  if ! command -v aws >/dev/null; then
+    curl -sSL https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o /tmp/awscli.zip
+    unzip -q -o /tmp/awscli.zip -d /tmp && sudo /tmp/aws/install --update
+  fi
+
+pepilot:
+  pep: project_config.yaml
+  workers: 2
+  # Once per sample, in `bash -euo pipefail`: if any line fails, the sample fails, and the
+  # upload never happens.
+  command: |
+    aws s3 cp --quiet {{ sample.bam | quote }} sample.bam
+    samtools flagstat -@ "$SAMTOOLS_THREADS" sample.bam > flagstat.txt
+    aws s3 cp --quiet flagstat.txt {{ sample.flagstat | quote }}
+    rm -f sample.bam flagstat.txt
+  # The result is one object, uploaded last, so its being there means the sample finished.
+  skip_if_exists:
+    - "{{ sample.flagstat }}"

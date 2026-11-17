@@ -1,0 +1,6 @@
+sample_name,organism,reads
+frog_1,frog,fastq
+frog_2,frog,fastq
+crab_1,crab,fastq
+crab_2,crab,fastq
+crab_3,crab,fastq
